@@ -13,6 +13,7 @@
 		FE69726F1D9906680060D93A /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FE69726D1D9906680060D93A /* Main.storyboard */; };
 		FE6972711D9906680060D93A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FE6972701D9906680060D93A /* Assets.xcassets */; };
 		FE6972741D9906680060D93A /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FE6972721D9906680060D93A /* LaunchScreen.storyboard */; };
+		FE69727D1D9907A70060D93A /* DragCardView.m in Sources */ = {isa = PBXBuildFile; fileRef = FE69727C1D9907A70060D93A /* DragCardView.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +27,10 @@
 		FE6972701D9906680060D93A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		FE6972731D9906680060D93A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		FE6972751D9906680060D93A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		FE69727B1D9907A70060D93A /* DragCardView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DragCardView.h; sourceTree = "<group>"; };
+		FE69727C1D9907A70060D93A /* DragCardView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DragCardView.m; sourceTree = "<group>"; };
+		FE69727E1D990A1A0060D93A /* PrefixHeader.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PrefixHeader.pch; sourceTree = "<group>"; };
+		FE6972801D990B720060D93A /* CardHeader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CardHeader.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,6 +67,10 @@
 				FE6972681D9906680060D93A /* AppDelegate.m */,
 				FE69726A1D9906680060D93A /* ViewController.h */,
 				FE69726B1D9906680060D93A /* ViewController.m */,
+				FE69727B1D9907A70060D93A /* DragCardView.h */,
+				FE69727C1D9907A70060D93A /* DragCardView.m */,
+				FE69727E1D990A1A0060D93A /* PrefixHeader.pch */,
+				FE6972801D990B720060D93A /* CardHeader.h */,
 				FE69726D1D9906680060D93A /* Main.storyboard */,
 				FE6972701D9906680060D93A /* Assets.xcassets */,
 				FE6972721D9906680060D93A /* LaunchScreen.storyboard */,
@@ -150,6 +159,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FE69727D1D9907A70060D93A /* DragCardView.m in Sources */,
 				FE69726C1D9906680060D93A /* ViewController.m in Sources */,
 				FE6972691D9906680060D93A /* AppDelegate.m in Sources */,
 				FE6972661D9906680060D93A /* main.m in Sources */,
@@ -272,6 +282,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				GCC_PREFIX_HEADER = "$(SRCROOT)/CardAnimation/PrefixHeader.pch";
 				INFOPLIST_FILE = CardAnimation/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.nibazhuang.www.CardAnimation;
@@ -283,6 +294,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				GCC_PREFIX_HEADER = "$(SRCROOT)/CardAnimation/PrefixHeader.pch";
 				INFOPLIST_FILE = CardAnimation/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.nibazhuang.www.CardAnimation;

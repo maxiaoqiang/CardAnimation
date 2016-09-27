@@ -121,13 +121,115 @@
         default:
             break;
     }
+    
+}
 
+#pragma mark--滑动时候，按钮变大
+-(void)updateOverLay:(CGFloat)distance{
+    [self.delegate moveCards:distance];
+}
+
+#pragma mark--后续动作判断
+-(void)followUpActionWithDistance:(CGFloat)distance andVelocity:(CGPoint)velocity{
     
+    if (xFromCenter > 0 && (distance > ACTION_MARGIN_RIGHT || velocity.x > ACTION_VELOCITY)) {
+        
+    }
     
+}
+
+-(void)rightAction:(CGPoint)velocity{
+    CGFloat distanceX = [[UIScreen mainScreen] bounds].size.width + CARD_WIDTH + self.originalCenter.x;//横向移动距离
+    CGFloat distanceY = distanceX * yFromCenter / xFromCenter;//纵向移动距离
+    CGPoint finishPoint = CGPointMake(self.originalCenter.x + distanceX, self.originalCenter.y + distanceY);//目标center点
+    CGFloat vel = sqrt(pow(velocity.x, 2) + pow(velocity.y, 2));//滑动手势横纵合速度
+    CGFloat displace = sqrt(pow(distanceX - xFromCenter, 2) + pow(distanceY - yFromCenter, 2));//需要动画完成的剩下距离
+    CGFloat duration = fabs(displace/vel);//动画时间
+    if (duration > 0.6) {
+        duration = 0.6;
+    }else if (duration < 0.3){
+        duration = 0.3;
+    }
+    
+    [UIView animateWithDuration:duration animations:^{
+        self.yesButton.transform = CGAffineTransformMakeScale(1.5, 1.5);
+        self.center = finishPoint;
+        self.transform = CGAffineTransformMakeRotation(ROTATION_ANGLE);
+    } completion:^(BOOL finished) {
+        self.yesButton.transform = CGAffineTransformMakeScale(1, 1);
+        [self.delegate swipCard:self Direction:YES];
+    }];
+    [self.delegate adjustOtherCards];
+}
+
+-(void)leftAction:(CGPoint)velocity{
+    //横向移动距离
+    CGFloat distanceX = -CARD_WIDTH - self.originalPoint.x;
+    //纵向移动距离
+    CGFloat distanceY = distanceX * yFromCenter/xFromCenter;
+    //目标center
+    CGPoint finishPoint = CGPointMake(self.originalPoint.x + distanceX, self.originalPoint.y + distanceY);
+    CGFloat vel = sqrtf(pow(velocity.x, 2) + pow(velocity.y, 2));
+    CGFloat displace = sqrtf(pow(distanceX - xFromCenter, 2) + pow(distanceY - yFromCenter, 2));
+    CGFloat duration = fabs(displace/vel);
+    if (duration > 0.6) {
+        duration = 0.6;
+    }else if (duration < 0.3){
+        duration = 0.3;
+    }
+    [UIView animateWithDuration:duration animations:^{
+        self.noButton.transform = CGAffineTransformMakeScale(1.5, 1.5);
+        self.center = finishPoint;
+        self.transform = CGAffineTransformMakeRotation(-ROTATION_ANGLE);
+    } completion:^(BOOL finished) {
+        self.noButton.transform = CGAffineTransformMakeScale(1, 1);
+        [self.delegate swipCard:self Direction:NO];
+        
+    }];
+    [self.delegate adjustOtherCards];
+    
+}
+
+-(void)rightButtonClickAction{
+    if (!self.canPan) {
+        return;
+    }
+    CGPoint finishPoint = CGPointMake([[UIScreen mainScreen] bounds].size.width + CARD_WIDTH * 2/3, 2 * PAN_DISTANCE + self.frame.origin.y);
+    [UIView animateWithDuration:CLICK_ANIMATION_TIME animations:^{
+        self.yesButton.transform = CGAffineTransformMakeScale(1.5, 1.5);
+        self.center = finishPoint;
+        self.transform = CGAffineTransformMakeRotation(-ROTATION_ANGLE);
+    } completion:^(BOOL finished) {
+        self.yesButton.transform = CGAffineTransformMakeScale(1, 1);
+        [self.delegate swipCard:self Direction:YES];
+        
+    }];
+    
+    [self.delegate adjustOtherCards];
     
     
     
 }
+
+-(void)leftButtonClickAction{
+    if (!self.canPan) {
+        return;
+    }
+    CGPoint finishPoint =CGPointMake(-CARD_WIDTH * 2/3, 2 * PAN_DISTANCE + self.frame.origin.y);
+    [UIView animateWithDuration:CLICK_ANIMATION_TIME animations:^{
+        self.noButton.transform = CGAffineTransformMakeScale(1.5, 1.5);
+        self.center = finishPoint;
+        self.transform = CGAffineTransformMakeRotation(-ROTATION_ANGLE);
+    } completion:^(BOOL finished) {
+        self.noButton.transform = CGAffineTransformMakeScale(1, 1);
+        [self.delegate swipCard:self Direction:NO];
+    }];
+    [self.delegate adjustOtherCards];
+    
+    
+}
+
+
 
 
 

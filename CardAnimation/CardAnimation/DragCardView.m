@@ -47,7 +47,7 @@
         bgView.clipsToBounds = YES;
         [self addSubview:bgView];
         
-        self.headerImageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, self.frame.size.width, self.frame.size.height)];
+        self.headerImageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, self.frame.size.width, self.frame.size.width)];
         self.headerImageView.backgroundColor = [UIColor lightGrayColor];
         self.headerImageView.userInteractionEnabled = YES;
         [bgView addSubview:self.headerImageView];
@@ -110,12 +110,12 @@
             CGAffineTransform transform = CGAffineTransformMakeRotation(rotationAngel);
             CGAffineTransform scaleTransform = CGAffineTransformScale(transform, scale, scale);
             self.transform = scaleTransform;
-        
+            [self updateOverLay:xFromCenter];
         }
             break;
         case UIGestureRecognizerStateEnded:
         {
-            
+            [self followUpActionWithDistance:xFromCenter andVelocity:[gesture locationInView:self.superview]];
         }
             break;
         default:
@@ -133,7 +133,18 @@
 -(void)followUpActionWithDistance:(CGFloat)distance andVelocity:(CGPoint)velocity{
     
     if (xFromCenter > 0 && (distance > ACTION_MARGIN_RIGHT || velocity.x > ACTION_VELOCITY)) {
-        
+        [self rightAction:velocity];
+    }else if (xFromCenter <0 &&(distance <-ACTION_MARGIN_RIGHT || velocity.x<-ACTION_VELOCITY)){
+        [self leftAction:velocity];
+    }else{
+        //回到原点
+        [UIView animateWithDuration:RESET_ANIMATION_TIME animations:^{
+            self.center = self.originalCenter;
+            self.transform = CGAffineTransformMakeRotation(0);
+            self.yesButton.transform = CGAffineTransformMakeScale(1, 1);
+            self.noButton.transform = CGAffineTransformMakeScale(1, 1);
+        }];
+        [self.delegate moveBackCards];
     }
     
 }

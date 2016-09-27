@@ -39,6 +39,12 @@
     self.sourceObject = [NSMutableArray array];
     self.page = 0;
     
+    [self addControls];
+    [self addCards];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [self requestSourceData:YES];
+    });
+    
 }
 
 #pragma mark--添加控件
@@ -124,7 +130,7 @@
         [UIView animateKeyframesWithDuration:0.5 delay:0.06 * i options:UIViewKeyframeAnimationOptionCalculationModeLinear animations:^{
             draggableView.center = finishPoint;
             draggableView.transform = CGAffineTransformMakeRotation(0);
-            if (i >0&&i <CARD_WIDTH - 1) {
+            if (i >0&&i <CARD_NUM - 1) {
                 DragCardView *preDraggableView = [_allCards objectAtIndex:i - 1];
                 draggableView.transform = CGAffineTransformScale(draggableView.transform, pow(CARD_SCALE, i), pow(CARD_SCALE, i));
                 CGRect frame = draggableView.frame;
@@ -184,9 +190,90 @@
 #pragma mark--滑动后续操作
 -(void)swipCard:(DragCardView *)cardView Direction:(BOOL)isRight{
     if (isRight) {
+        [self like:cardView.infoDict];
+    }else{
+        [self unlike:cardView.infoDict];
+    }
+    [_allCards removeObject:cardView];
+    cardView.transform = self.lastCardTTransform;
+    cardView.center = self.lastCardCenter;
+    cardView.canPan = NO;
+    [self.view insertSubview:cardView belowSubview:[_allCards lastObject]];
+    [_allCards addObject:cardView];
+    if ([self.sourceObject firstObject] != nil) {
+        
+        cardView.infoDict = [self.sourceObject firstObject];
+        [self.sourceObject removeObjectAtIndex:0];
+        [cardView layoutSubviews];
+        if (self.sourceObject.count <MIN_INFO_NUM) {
+            [self requestSourceData:NO];
+        }
+        
+    }else{
+        cardView.hidden = YES;//如果没有数据则隐藏卡片
+    }
+    
+    for (int i = 0; i <CARD_NUM; i ++) {
+        DragCardView *draggableView = [_allCards objectAtIndex:i];
+        draggableView.originalCenter = draggableView.center;
+        draggableView.originalTransform = draggableView.transform;
+        if (i==0) {
+            draggableView.canPan = YES;
+        }
+    }
+    
+}
+
+#pragma mark--滑动中更改其他卡片位置
+-(void)moveCards:(CGFloat)distance{
+    if (fabs(distance)<= PAN_DISTANCE) {
+        for (int i = 1; i <CARD_NUM - 1; i ++) {
+            DragCardView *draggableView = _allCards[i];
+            DragCardView *preDraggableView = [_allCards objectAtIndex:i-1];
+            draggableView.transform = CGAffineTransformScale(draggableView.originalTransform, 1+(1/CARD_SCALE -1)*fabs(distance/PAN_DISTANCE)* 0.6, 1+ (1/CARD_SCALE -1)*fabs(distance/PAN_DISTANCE)*0.6);//0.6为缩减因数，使放大速度始终小于卡片移动速度的
+            CGPoint center = draggableView.center;
+            center.y = draggableView.originalCenter.y - (draggableView.originalCenter.y - preDraggableView.originalCenter.y)*fabs(distance/PAN_DISTANCE)*0.6;//此处的0.6同上
+            draggableView.center = center;
+        }
+    }
+    
+    if (distance >0) {
+        self.likeBtn.transform = CGAffineTransformMakeScale(1 + 0.1*fabs(distance/PAN_DISTANCE), 1 + 0.1*fabs(distance/PAN_DISTANCE));
+    }else{
+        self.disLikeBtn.transform = CGAffineTransformMakeScale(1 + 0.1*fabs(distance/PAN_DISTANCE), 1+0.1*fabs(distance/PAN_DISTANCE));
+    }
+    
+}
+
+
+#pragma mark--滑动终止后复原其他卡片
+-(void)moveBackCards{
+    for (int i =1; i < CARD_NUM - 1; i ++) {
+        DragCardView *draggableView = _allCards[i];
+        [UIView animateWithDuration:RESET_ANIMATION_TIME animations:^{
+            draggableView.transform = draggableView.originalTransform;
+            draggableView.center = draggableView.originalCenter;
+        }];
         
     }
 }
+
+
+#pragma mark--滑动后调整其他卡片位置
+-(void)adjustOtherCards{
+    [UIView animateWithDuration:0.2 animations:^{
+        for (int i = 1; i < CARD_NUM - 1; i ++) {
+            DragCardView *draggableView = _allCards[i];
+            DragCardView *preDraggableView = [_allCards objectAtIndex:i-1];
+            draggableView.transform = preDraggableView.originalTransform;
+            draggableView.center = preDraggableView.originalCenter;
+        }
+    } completion:^(BOOL finished) {
+        self.disLikeBtn.transform = CGAffineTransformMakeScale(1, 1);
+        self.likeBtn.transform = CGAffineTransformMakeScale(1, 1);
+    }];
+}
+
 
 
 #pragma nark--like
@@ -199,6 +286,46 @@
 -(void)unlike:(NSDictionary *)userInfo{
         /** 在此添加“不喜欢”的后续操作 */
     NSLog(@"unlike:%@",userInfo[@"number"]);
+}
+
+-(void)rightButtonClickAction{
+    if (_flag == YES) {
+        return;
+    }
+    _flag = YES;
+    DragCardView *dragView = self.allCards[0];
+    CGPoint finishPoint = CGPointMake([[UIScreen mainScreen] bounds].size.width + CARD_WIDTH * 2/3, 2 * PAN_DISTANCE + dragView.frame.origin.y);
+    [UIView animateWithDuration:CLICK_ANIMATION_TIME animations:^{
+        self.likeBtn.transform = CGAffineTransformMakeScale(1.2, 1.2);
+        dragView.center = finishPoint;
+        dragView.transform = CGAffineTransformMakeRotation(-ROTATION_ANGLE);
+    } completion:^(BOOL finished) {
+        self.likeBtn.transform = CGAffineTransformMakeScale(1, 1);
+        [self swipCard:dragView Direction:YES];
+        _flag = NO;
+    }];
+    [self adjustOtherCards];
+}
+
+-(void)leftButtonClickAction{
+    if (_flag == YES) {
+        return;
+    }
+    
+    _flag = YES;
+    DragCardView *dragView = self.allCards[0];
+    CGPoint finishPoint = CGPointMake(-CARD_WIDTH * 2/3, 2 * PAN_DISTANCE + dragView.frame.origin.y);
+    [UIView animateWithDuration:CLICK_ANIMATION_TIME animations:^{
+        self.disLikeBtn.transform = CGAffineTransformMakeScale(1.2, 1.2);
+        dragView.center = finishPoint;
+        dragView.transform = CGAffineTransformMakeRotation(-ROTATION_ANGLE);
+    } completion:^(BOOL finished) {
+        self.disLikeBtn.transform = CGAffineTransformMakeScale(1, 1);
+        [self swipCard:dragView Direction:NO];
+        _flag = NO;
+    }];
+    [self adjustOtherCards];
+    
 }
 
 

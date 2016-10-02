@@ -88,12 +88,12 @@
 }
 
 #pragma mark-拖动手势
--(void)beingDragged:(UITapGestureRecognizer *)gesture{
+-(void)beingDragged:(UIPanGestureRecognizer *)gesture{
     if (!self.canPan) {
         return;
     }
-    xFromCenter = [gesture locationInView:self].x;
-    yFromCenter = [gesture locationInView:self].y;
+    xFromCenter = [gesture translationInView:self].x;
+    yFromCenter = [gesture translationInView:self].y;
     switch (gesture.state) {
         case UIGestureRecognizerStateBegan:
         {
@@ -115,7 +115,7 @@
             break;
         case UIGestureRecognizerStateEnded:
         {
-            [self followUpActionWithDistance:xFromCenter andVelocity:[gesture locationInView:self.superview]];
+            [self followUpActionWithDistance:xFromCenter andVelocity:[gesture velocityInView:self.superview]];
         }
             break;
         default:
